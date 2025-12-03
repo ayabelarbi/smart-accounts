@@ -1,3 +1,27 @@
+# EIP 4337 In depth 
+
+## Hindsight  
+### Security implications of EOAs versus Smart Contract Accounts
+DIfference between smart contract accounts, account abstraction and EOA. 
+
+
+### The role of EntryPoint contracts in ERC-4337
+
+
+## Implementation 
+This implementation uses the entryPoint V0.7 
+
+
+
+## Source 
+[Eip4337 contracts and interfaces](https://github.com/eth-infinitism/account-abstraction/tree/releases/v0.7/contracts)
+[ERC-4337 Specification](https://eips.ethereum.org/EIPS/eip-4337)
+
+
+
+
+
+
 ## Foundry
 
 **Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
