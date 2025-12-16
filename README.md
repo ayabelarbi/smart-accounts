@@ -28,7 +28,7 @@ Ethereum clients (Geth, Nethermind, Erigon, etc.) only know how to validate ECDS
 ![how erc-4337 works](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*Eg-d588nTuOSr3Cmt1rzDQ.png)
 
 ## Implementation 
-This implementation uses the entryPoint V0.7 
+This implementation uses the [entryPoint V0.7 ](https://github.com/eth-infinitism/account-abstraction/blob/releases/v0.7/README.md)
 
 
 
