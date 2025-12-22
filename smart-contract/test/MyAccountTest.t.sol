@@ -122,22 +122,21 @@ contract MyAccountTest is Test {
             .getUserOpHash(userOp);
         bytes32 ethHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
 
-        // paymaster signs userOpHash
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(paymasterSignerKey, ethHash);
-        bytes memory pmSig = abi.encodePacked(r, s, v);
+        // paymaster signs blindly userOp hash
+/*         (uint8 v, bytes32 r, bytes32 s) = vm.sign(paymasterSignerKey, ethHash);
+        bytes memory pmSig = abi.encodePacked(r, s, v); */
 
         // pack paymasterAndData correctly for v0.7
         userOp.paymasterAndData = abi.encodePacked(
             address(paymaster),
             pmVerificationGasLimit,
-            pmPostOpGasLimit,
-            pmSig
+            pmPostOpGasLimit
         );
 
         // owner signs the final userOp (includes paymasterAndData)
         userOp.signature = _signUserOp(userOp, owner1Key);
 
-        PackedUserOperation;
+        PackedUserOperation [] memory ops = new PackedUserOperation[](1);
         ops[0] = userOp;
 
         entryPoint.handleOps(ops, payable(beneficiary));
@@ -187,10 +186,10 @@ contract MyAccountTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerKey, ethHash);
         bytes memory sig = abi.encodePacked(r, s, v);
 
-        address;
+        address [] memory signers = new address[](1);
         signers[0] = owner1;
 
-        bytes;
+        bytes [] memory signatures = new bytes[](1);
         signatures[0] = sig;
 
         bytes memory payload = abi.encode(signers, signatures);

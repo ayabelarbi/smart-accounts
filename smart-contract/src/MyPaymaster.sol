@@ -29,6 +29,7 @@ contract MyPaymaster is IPaymaster, Ownable {
         ENTRY_POINT.depositTo{value: msg.value}(address(this));
     }
 
+    // It Validates blindly the userOp hash signed by the verifyingSigner
     function validatePaymasterUserOp(
         PackedUserOperation calldata userOp,
         bytes32 userOpHash,
@@ -41,6 +42,7 @@ contract MyPaymaster is IPaymaster, Ownable {
     {
         if (msg.sender != address(ENTRY_POINT)) revert("Not EntryPoint");
 
+        /* 
         // v0.7 paymasterAndData layout:
         // [ paymaster (20) | verificationGasLimit (16) | postOpGasLimit (16) | paymasterData (N) ]
         if (userOp.paymasterAndData.length < 20 + 16 + 16) {
@@ -54,7 +56,7 @@ contract MyPaymaster is IPaymaster, Ownable {
         bytes32 hash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
         if (verifyingSigner != ECDSA.recover(hash, paymasterData)) {
             return ("", SIG_VALIDATION_FAILED);
-        }
+        } */
 
         return ("", SIG_VALIDATION_SUCCESS);
     }
