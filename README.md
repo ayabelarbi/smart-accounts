@@ -25,16 +25,16 @@ EntryPoint is the on-chain contract that acts like a “meta-transaction router�
 - It handles fees and gas accounting
 
 Ethereum clients (Geth, Nethermind, Erigon, etc.) only know how to validate ECDSA signatures from EOA.  ERC-4337 avoids a hard fork by moving “transaction validity” into a contract flow. So EntryPoint is the compatibility layer that makes SCAs usable like accounts.
-![how erc-4337 works](https://miro.medium.com/v2/resize:fit:4800/0*IThEWr1KugkIQHrf.png)
+![how erc-4337 works](image.png)
+
 
 ## Implementation 
 This implementation uses the [entryPoint V0.7 ](https://github.com/eth-infinitism/account-abstraction/blob/releases/v0.7/README.md)
-
+The Bundler is provided by Pimlico. 
 
 ## Source 
 [Eip4337 contracts and interfaces](https://github.com/eth-infinitism/account-abstraction/tree/releases/v0.7/contracts)
 [ERC-4337 Specification](https://eips.ethereum.org/EIPS/eip-4337)
-
 
 
 

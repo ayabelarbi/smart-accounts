@@ -2,9 +2,6 @@
 pragma solidity ^0.8.24;
 
 import {Script} from "forge-std/Script.sol";
-import {EntryPoint} from "lib/account-abstraction/contracts/core/EntryPoint.sol";
-import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
-
 contract HelperConfig is Script {
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -46,9 +43,7 @@ contract HelperConfig is Script {
     }
 
     function getConfigByChainId(uint256 chainId) public returns (NetworkConfig memory) {
-        if (chainId == LOCAL_CHAIN_ID) {
-            return getOrCreateAnvilEthConfig();
-        } else if (networkConfigs[chainId].account != address(0)) {
+        if (networkConfigs[chainId].account != address(0)) {
             return networkConfigs[chainId];
         } else {
             revert HelperConfig__InvalidChainId();
