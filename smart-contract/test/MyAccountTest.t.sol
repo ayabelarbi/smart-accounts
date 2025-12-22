@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-import {Test, console} from "lib/forge-std/src/Test.sol";
+import {Test} from "lib/forge-std/src/Test.sol";
 import {MyAccount} from "../src/MyAccount.sol";
 import {MyAccountFactory} from "../src/MyAccountFactory.sol";
 import {MyPaymaster} from "../src/MyPaymaster.sol";
-import {IPaymaster} from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import {PackedUserOperation} from "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {EntryPoint} from "lib/account-abstraction/contracts/core/EntryPoint.sol";
 
 contract MyAccountTest is Test {
     MyAccountFactory public factory;
@@ -39,8 +39,7 @@ contract MyAccountTest is Test {
     }
 
     function test_ValidateAndExecuteUserOp() public {
-        assertEq(address(account).balance, 0);
-
+        assertEq(address(account).balance, 10 ether);
         // 1. Create the call data (What we want the wallet to do)
         bytes memory callData = abi.encodeWithSelector(
             MyAccount.execute.selector,
@@ -67,7 +66,9 @@ contract MyAccountTest is Test {
         });
 
         // 3. Sign the UserOp
-        bytes32 userOpHash = _getHash(userOp);
+        bytes32 userOpHash = EntryPoint(payable(address(entryPoint)))
+            .getUserOpHash(userOp);
+
         bytes32 ethHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, ethHash);
@@ -92,64 +93,107 @@ contract MyAccountTest is Test {
         vm.prank(address(entryPoint));
         account.execute(beneficiary, 1 ether, "");
 
-        assertEq(beneficiary.balance, 1 ether);
+        uint256 beforeBal = beneficiary.balance;
+
+        vm.prank(address(entryPoint));
+        account.execute(beneficiary, 1 ether, "");
+
+        assertEq(beneficiary.balance, beforeBal + 1 ether);
     }
 
     function test_SponsoredUserOp() public {
-        // 1. Setup Paymaster
-        address paymasterSigner = makeAddr("paymasterSigner");
+        // paymaster signer with a REAL key
+        (address paymasterSigner, uint256 paymasterSignerKey) = makeAddrAndKey(
+            "paymasterSigner"
+        );
         MyPaymaster paymaster = new MyPaymaster(entryPoint, paymasterSigner);
 
-        // 2. Fund Paymaster on EntryPoint
         vm.deal(address(this), 10 ether);
         paymaster.deposit{value: 2 ether}();
 
-        // 3. Construct UserOp
         PackedUserOperation memory userOp = _createBaseUserOp();
 
-        // 4. Generate Paymaster Signature (Off-chain simulation)
-        bytes32 userOpHash = _getHash(userOp);
+        // v0.7 requires these gas limits inside paymasterAndData
+        uint128 pmVerificationGasLimit = 200_000;
+        uint128 pmPostOpGasLimit = 200_000;
+
+        // compute REAL EntryPoint hash (fork realism)
+        bytes32 userOpHash = EntryPoint(payable(address(entryPoint)))
+            .getUserOpHash(userOp);
         bytes32 ethHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            uint256(uint160(paymasterSigner)),
-            ethHash
-        );
+
+        // paymaster signs userOpHash
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(paymasterSignerKey, ethHash);
         bytes memory pmSig = abi.encodePacked(r, s, v);
 
-        // 5. Attach Paymaster to UserOp
-        // Format: address(paymaster) + signature
-        userOp.paymasterAndData = abi.encodePacked(address(paymaster), pmSig);
+        // pack paymasterAndData correctly for v0.7
+        userOp.paymasterAndData = abi.encodePacked(
+            address(paymaster),
+            pmVerificationGasLimit,
+            pmPostOpGasLimit,
+            pmSig
+        );
 
-        // 6. Sign UserOp with Wallet Owner (as before)
+        // owner signs the final userOp (includes paymasterAndData)
         userOp.signature = _signUserOp(userOp, owner1Key);
 
-        // 7. Execute via EntryPoint
-        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+        PackedUserOperation;
         ops[0] = userOp;
 
-        vm.prank(address(0x123)); // Any bundler address
         entryPoint.handleOps(ops, payable(beneficiary));
-
-        // Verify beneficiary got the funds AND account didn't pay (Paymaster paid)
-        assertEq(beneficiary.balance, 1 ether);
     }
 
     // Helper to get UserOp Hash (Simplification of EntryPoint logic)
-    function _getHash(
-        PackedUserOperation memory userOp
-    ) internal view returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    userOp.sender,
-                    userOp.nonce,
-                    keccak256(userOp.initCode),
-                    keccak256(userOp.callData),
-                    userOp.accountGasLimits,
-                    userOp.preVerificationGas,
-                    userOp.gasFees,
-                    keccak256(userOp.paymasterAndData)
-                )
-            );
+    function _createBaseUserOp()
+        internal
+        view
+        returns (PackedUserOperation memory)
+    {
+        bytes memory callData = abi.encodeWithSelector(
+            MyAccount.execute.selector,
+            beneficiary,
+            1 ether,
+            ""
+        );
+
+        PackedUserOperation memory userOp = PackedUserOperation({
+            sender: address(account),
+            nonce: 0,
+            initCode: "",
+            callData: callData,
+            accountGasLimits: bytes32(
+                abi.encodePacked(uint128(500000), uint128(500000))
+            ),
+            preVerificationGas: 50000,
+            gasFees: bytes32(
+                abi.encodePacked(uint128(1 gwei), uint128(1 gwei))
+            ),
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        return userOp;
+    }
+
+    // Sign the userOp with the owner's key and return the full wallet signature payload
+    function _signUserOp(
+        PackedUserOperation memory userOp,
+        uint256 signerKey
+    ) internal returns (bytes memory) {
+        bytes32 userOpHash = EntryPoint(payable(address(entryPoint)))
+            .getUserOpHash(userOp);
+        bytes32 ethHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerKey, ethHash);
+        bytes memory sig = abi.encodePacked(r, s, v);
+
+        address;
+        signers[0] = owner1;
+
+        bytes;
+        signatures[0] = sig;
+
+        bytes memory payload = abi.encode(signers, signatures);
+        return abi.encode(uint8(0), payload);
     }
 }

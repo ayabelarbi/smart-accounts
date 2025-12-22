@@ -38,16 +38,27 @@ The Bundler is provided by Pimlico.
 
 
 
-## Foundry
+## Frontend 
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+** To run locally you need to**
+```sh
+# Step 1: Install the necessary dependencies.
+npm i
 
-Foundry consists of:
+# Step 2: Spin up the code 
+npm run dev
+```
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+The Frontend is built with:
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+
+## Smart Contract 
+
 
 ## Documentation
 
@@ -64,7 +75,9 @@ $ forge build
 ### Test
 
 ```shell
-$ forge test
+$ forge test test/MyAccountTest.t.sol \
+  --fork-url https://0xrpc.io/sep \
+  -vvvv
 ```
 
 ### Format
@@ -79,12 +92,6 @@ $ forge fmt
 $ forge snapshot
 ```
 
-### Anvil
-
-```shell
-$ anvil
-```
-
 ### Deploy
 
 ```shell
@@ -95,12 +102,4 @@ $ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --pri
 
 ```shell
 $ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
 ```

@@ -13,40 +13,49 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 contract MyPaymaster is IPaymaster, Ownable {
     using ECDSA for bytes32;
 
-    IEntryPoint public immutable entry_point;
+    IEntryPoint public immutable ENTRY_POINT;
     address public verifyingSigner;
 
-    constructor(IEntryPoint _entryPoint, address _verifyingSigner) Ownable(msg.sender) {
-        entry_point = _entryPoint;
+    constructor(
+        IEntryPoint _entryPoint,
+        address _verifyingSigner
+    ) Ownable(msg.sender) {
+        ENTRY_POINT = _entryPoint;
         verifyingSigner = _verifyingSigner;
     }
 
     // Required by EntryPoint: Paymaster must have ETH deposited
     function deposit() public payable {
-        entry_point.depositTo{value: msg.value}(address(this));
+        ENTRY_POINT.depositTo{value: msg.value}(address(this));
     }
 
     function validatePaymasterUserOp(
         PackedUserOperation calldata userOp,
         bytes32 userOpHash,
-        uint256 maxCost
-    ) external view override returns (bytes memory context, uint256 validationData) {
-        // 1. The Paymaster checks if it's being called by the EntryPoint
-        if (msg.sender != address(entry_point)) revert("Not EntryPoint");
+        uint256 /*maxCost*/
+    )
+        external
+        view
+        override
+        returns (bytes memory context, uint256 validationData)
+    {
+        if (msg.sender != address(ENTRY_POINT)) revert("Not EntryPoint");
 
-        // 2. We expect a signature in the paymasterAndData field
-        // paymasterAndData = [address(this) (20 bytes) || signature (rest)]
-        bytes calldata paymasterData = userOp.paymasterAndData[20:];
-        
-        if (paymasterData.length == 0) return ("", SIG_VALIDATION_FAILED);
-
-        // 3. Verify that the 'verifyingSigner' signed this specific userOpHash
-        bytes32 hash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
-        if (verifyingSigner != hash.recover(paymasterData)) {
+        // v0.7 paymasterAndData layout:
+        // [ paymaster (20) | verificationGasLimit (16) | postOpGasLimit (16) | paymasterData (N) ]
+        if (userOp.paymasterAndData.length < 20 + 16 + 16) {
             return ("", SIG_VALIDATION_FAILED);
         }
 
-        // Return empty context and success
+        bytes calldata paymasterData = userOp.paymasterAndData[52:]; // 20+16+16 = 52
+
+        if (paymasterData.length == 0) return ("", SIG_VALIDATION_FAILED);
+
+        bytes32 hash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
+        if (verifyingSigner != ECDSA.recover(hash, paymasterData)) {
+            return ("", SIG_VALIDATION_FAILED);
+        }
+
         return ("", SIG_VALIDATION_SUCCESS);
     }
 
