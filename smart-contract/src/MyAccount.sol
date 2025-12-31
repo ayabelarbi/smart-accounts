@@ -372,4 +372,18 @@ contract MyAccount is IAccount, Initializable, UUPSUpgradeable {
         isGuardian[g] = allowed;
         emit GuardianSet(g, allowed);
     }
+
+    function getOwners() external view returns (address[] memory) {
+        return owners;
+    }
+
+    function getSessionKey(
+        address key
+    ) external view returns (SessionKey memory) {
+        return sessionKeys[key];
+    }
+
+    function isOwnerGuardian(address addr) external view returns (bool) {
+        return isGuardian[addr];
+    }
 }

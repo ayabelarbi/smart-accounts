@@ -65,6 +65,6 @@ contract MyAccountFactory {
             )
         );
 
-        return Create2.computeAddress(bytes32(salt), bytecodeHash);
+        return Create2.computeAddress(bytes32(salt), bytecodeHash, address(this));
     }
 }
