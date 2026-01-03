@@ -1,22 +1,26 @@
 <script lang="ts">
-  import WalletPanel from '$lib/components/WalletPanel.svelte';
-  import ActionsPanel from '$lib/components/ActionsPanel.svelte';
-  import LogsPanel from '$lib/components/LogsPanel.svelte';
-  import { ACTIVE_NETWORK } from '$lib/contracts/addresses';
-  import { onMount } from 'svelte';
-  import { logs } from '$lib/stores/logs';
+  import WalletPanel from "$lib/components/WalletPanel.svelte";
+  import ActionsPanel from "$lib/components/ActionsPanel.svelte";
+  import LogsPanel from "$lib/components/LogsPanel.svelte";
+  import { ACTIVE_NETWORK } from "$lib/contracts/addresses";
+  import { onMount } from "svelte";
+  import { logs } from "$lib/stores/logs";
 
   onMount(() => {
-    logs.info('AA Wallet Frontend initialized');
+    logs.info("AA Wallet Frontend initialized");
     logs.info(`Network: ${ACTIVE_NETWORK}`);
-    logs.info('Ready to connect...');
+    logs.info("Ready to connect...");
   });
 </script>
 
 <svelte:head>
   <title>AA Wallet | Account Abstraction Demo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin="anonymous"
+  />
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap"
     rel="stylesheet"
@@ -31,7 +35,12 @@
     </div>
     <div class="header-info">
       <span class="version">ERC-4337 v0.7</span>
-      <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="github-link">
+      <a
+        href="https://github.com/ayabelarbi/smart-accounts/blob/main/README.md"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="github-link"
+      >
         DOCS →
       </a>
     </div>
@@ -49,13 +58,6 @@
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="footer-content">
-      <span>Built with</span>
-      <span class="tech-stack">Svelte • Viem • Pimlico • Solidity</span>
-    </div>
-  </footer>
-
   <div class="bg-grid"></div>
 </div>
 
@@ -69,7 +71,7 @@
   :global(body) {
     background: #050505;
     color: #fff;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: "Space Grotesk", sans-serif;
     min-height: 100vh;
   }
 
@@ -83,7 +85,10 @@
   .bg-grid {
     position: fixed;
     inset: 0;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    background-image: linear-gradient(
+        rgba(255, 255, 255, 0.02) 1px,
+        transparent 1px
+      ),
       linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
     background-size: 50px 50px;
     pointer-events: none;
@@ -113,7 +118,7 @@
   }
 
   .logo-text {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: "JetBrains Mono", monospace;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.2em;
@@ -127,7 +132,7 @@
   }
 
   .version {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: "JetBrains Mono", monospace;
     font-size: 10px;
     letter-spacing: 0.1em;
     color: #4a4a4a;
@@ -137,7 +142,7 @@
   }
 
   .github-link {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: "JetBrains Mono", monospace;
     font-size: 10px;
     letter-spacing: 0.1em;
     color: #666;
@@ -175,27 +180,6 @@
     min-height: 0;
   }
 
-  .footer {
-    position: relative;
-    z-index: 10;
-    padding: 16px 40px;
-    border-top: 1px solid #1a1a1a;
-  }
-
-  .footer-content {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    color: #3a3a3a;
-  }
-
-  .tech-stack {
-    color: #4a4a4a;
-  }
-
   @media (max-width: 1024px) {
     .grid {
       grid-template-columns: 1fr;
@@ -207,8 +191,7 @@
     }
 
     .header,
-    .main,
-    .footer {
+    .main {
       padding-left: 20px;
       padding-right: 20px;
     }
