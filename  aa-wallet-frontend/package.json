@@ -22,7 +22,6 @@
 	},
 	"dependencies": {
 		"@noble/hashes": "^2.0.1",
-		"permissionless": "0.3.2",
 		"viem": "^2.43.4"
 	}
 }
