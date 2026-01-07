@@ -84,9 +84,7 @@ npm run dev
 
 - Vite
 - TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- Svelte
 
 ## Source
 
