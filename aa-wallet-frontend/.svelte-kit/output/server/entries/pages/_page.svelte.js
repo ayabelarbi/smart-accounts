@@ -1172,12 +1172,13 @@ function WalletPanel($$renderer, $$props) {
     var $$store_subs;
     let paymasterDeposit = 0n;
     let fundingPaymaster = false;
-    const addresses2 = getAddresses();
-    console.log("ENTRYPOINT(UI):", addresses2.entryPoint);
-    console.log("ENTRYPOINT(BUNDLER):", getAddresses().entryPoint);
-    console.log("PAYMASTER:", addresses2.paymaster);
     $$renderer2.push(`<div class="wallet-panel svelte-wlrh8d"><div class="panel-header svelte-wlrh8d"><div${attr_class("status-dot svelte-wlrh8d", void 0, {
-      "connected": store_get($$store_subs ??= {}, "$wallet", wallet).connected
+      "connected": (
+        /* console.log("ENTRYPOINT(UI):", addresses.entryPoint);
+        console.log("ENTRYPOINT(BUNDLER):", getAddresses().entryPoint);
+        console.log("PAYMASTER:", addresses.paymaster); */
+        store_get($$store_subs ??= {}, "$wallet", wallet).connected
+      )
     })}></div> <span>WALLET</span> <span class="network-badge svelte-wlrh8d">${escape_html(ACTIVE_NETWORK.toUpperCase())}</span></div> <div class="panel-content svelte-wlrh8d">`);
     if (!store_get($$store_subs ??= {}, "$wallet", wallet).connected) {
       $$renderer2.push("<!--[-->");
