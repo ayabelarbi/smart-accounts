@@ -1,7 +1,0 @@
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": ".svelte-kit",
-  "installCommand": "npm install",
-  "framework": null,
-  "rootDirectory": " aa-wallet-frontend"
-}
